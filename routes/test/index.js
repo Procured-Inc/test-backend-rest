@@ -55,7 +55,8 @@ router.route('/start/:testid')
                 console.log(post);
 
 
-                connection.query('select * from student_info where student_id=?', studentid, function (rows, err) {
+                connection.query('select * from student_info where student_id=?', studentid, function (err, rows
+                ) {
                     if(!rows) {
                         console.log("USER registration not present");
                         //res.send.JSON({message: "user not registered to give test"});
@@ -63,6 +64,7 @@ router.route('/start/:testid')
 
                 });
                 // console.log(post);
+                //connection.query('select ')
                 var query2 = connection.query('INSERT into result_info SET ?', post, function(rows, err) {
                     if(err) {
                         console.log(err);
@@ -102,11 +104,16 @@ router.route('/start/:testid')
 
 
 router.route('/stop/:testid')
-    .post(function (req, res) {
+    .post(function (err, req, res) {
+        console.out(1);
         var testid = req.params.testid;
+        console.out(2);
         var studentid = req.body.student_id;
+        console.out(3);
         var endtime = req.body.endtime;
         var answers = req.body.answers;
+        console.out(err);
+        console.log(testid, studentid, endtime, answers);
         var endtime1 = endtime.toISOString().slice(0, 19).replace('T', ' ');
         var urlapti = 'http://178.33.132.20:30000/questions/apti/stoptest/' + testid;
         var urltech = 'http://178.33.132.20:30000/questions/tech/stoptest/' + testid;
@@ -124,12 +131,15 @@ router.route('/stop/:testid')
         jsonpsycho = JSON.parse(restpsycho.getBody(('utf8')));
 
 
+
         var correctset = {
             apti: resapti,
             tech: restech,
             psycho: restpsycho
 
         };
+
+
 
         var doy = functions.getValues(correctset.apti, 'correct');
         console.log(doy);

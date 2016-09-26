@@ -58,7 +58,7 @@ module.exports = {
         },
 
 
-    sort_by : function(field, reverse, primer){
+    sortBy : function(field, reverse, primer){
 
         var key = primer ?
             function(x) {return primer(x[field])} :
@@ -73,3 +73,4 @@ module.exports = {
     };
 
 
+//functions.sortBy()
