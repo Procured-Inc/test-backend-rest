@@ -59,13 +59,12 @@ if (app.get('env') === 'development') {
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
-  console.log('error', {
+  res.send('error', {
     message: err.message,
-    error: {}
+    error: {},
+    err: err
   });
-  console.log(err);
 });
-
 
 
 module.exports = app;

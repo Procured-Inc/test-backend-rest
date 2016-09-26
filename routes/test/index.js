@@ -3,10 +3,57 @@ var request = require('sync-request');
 var router = express.Router();
 var http = require('http');
 var connection = require('../../connection/mysql');
+var bodyParser = require('body-parser');
+
+
+app = express();
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: false }));
+
+var jsonParser = bodyParser.json()
+
+// create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
+
 
 var functions = require('./functions');
 
-app = express();
+
+
+router.route('/starttest/:testid')
+    .get(function(req, res) {
+
+        var testid = req.params.testid;
+        console.log(testid);
+        var urlapti = 'http://178.33.132.20:30000/questions/apti/starttest/' + testid;
+        var urltech = 'http://178.33.132.20:30000/questions/tech/starttest/' + testid;
+        var urlpsycho = 'http://178.33.132.20:30000/questions/psycho/starttest/' + testid;
+
+        var jsonapti = "";
+        var jsontech = "";
+        var jsonpsycho = "";
+
+        var resapti = request('GET', urlapti);
+        jsonapti = JSON.parse(resapti.getBody(('utf8')));
+        var restech = request('GET', urltech);
+        jsontech = JSON.parse(restech.getBody(('utf8')));
+        var restpsycho = request('GET', urlpsycho);
+        jsonpsycho = JSON.parse(restpsycho.getBody(('utf8')));
+
+
+        var questionset = {
+            testID: testid,
+            apti: jsonapti,
+            tech: jsontech,
+            psycho: jsonpsycho
+        };
+        res.json(questionset);
+        console.log(questionset);
+
+
+
+    });
 
 
 router.route('/start/:testid')
@@ -65,6 +112,9 @@ router.route('/start/:testid')
                 });
                 // console.log(post);
                 //connection.query('select ')
+                // connection.query('select * from result_info where student_id =? and test_id=?', studentid, testid, function(err, rows) {
+                //
+                // });
                 var query2 = connection.query('INSERT into result_info SET ?', post, function(rows, err) {
                     if(err) {
                         console.log(err);
@@ -104,15 +154,30 @@ router.route('/start/:testid')
 
 
 router.route('/stop/:testid')
-    .post(function (err, req, res) {
-        console.out(1);
+    .post(jsonParser, function (req, res) {
+        console.log(1);
+        try {
+            console.log(req.body)
+            var keys = [];
+            for(var k in req.body) keys.push(k);
+            console.log(keys);
+            var bb = JSON.parse(keys[0]);
+            console.log(bb);
+        }
+        catch (ex) {
+            console.log(ex);
+        }
+        // console.log(JSON.parse(req.body));
         var testid = req.params.testid;
-        console.out(2);
-        var studentid = req.body.student_id;
-        console.out(3);
-        var endtime = req.body.endtime;
-        var answers = req.body.answers;
-        console.out(err);
+        console.log(2);
+        var studentid = bb.student_id;
+        console.log(3);
+        console.log(typeof(bb.endtime));
+        var endtime = new Date(Date.parse(bb.endtime));
+        console.log(4);
+        var answers = bb.answers;
+        console.log(answers);
+        console.log(5);
         console.log(testid, studentid, endtime, answers);
         var endtime1 = endtime.toISOString().slice(0, 19).replace('T', ' ');
         var urlapti = 'http://178.33.132.20:30000/questions/apti/stoptest/' + testid;
@@ -133,21 +198,11 @@ router.route('/stop/:testid')
 
 
         var correctset = {
-            apti: resapti,
-            tech: restech,
-            psycho: restpsycho
+            apti: jsonapti,
+            tech: jsontech,
+            psycho: jsonpsycho
 
         };
-
-
-
-        var doy = functions.getValues(correctset.apti, 'correct');
-        console.log(doy);
-
-
-
-
-
 
 
 
@@ -159,6 +214,7 @@ router.route('/stop/:testid')
 
 
 
+        console.log(correctset);
 
 
         console.log(answers);
@@ -254,9 +310,8 @@ router.route('/stop/:testid')
     });
 
 
-
-module.exports = app;
 module.exports = router;
+
 
 
 
